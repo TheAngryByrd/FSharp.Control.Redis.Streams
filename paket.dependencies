@@ -12,8 +12,12 @@ nuget YoloDev.Expecto.TestSdk 0.8.0
 nuget Microsoft.NET.Test.Sdk 15.7.2
 nuget altcover ~> 5
 
-nuget Hopac
 nuget StackExchange.Redis
+nuget Hopac
+nuget Akka.Streams
+nuget TaskBuilder.fs
+
+
 // [ FAKE GROUP ]
 group Build
 
