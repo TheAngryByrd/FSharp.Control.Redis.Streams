@@ -2,6 +2,8 @@
 
 set -eu
 set -o pipefail
+PAKET_SKIP_RESTORE_TARGETS=true
+export PAKET_SKIP_RESTORE_TARGETS
 
 # liberated from https://stackoverflow.com/a/18443300/433393
 realpath() {

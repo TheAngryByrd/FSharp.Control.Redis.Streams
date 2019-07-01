@@ -2,9 +2,10 @@ module Tests
 
 open System
 open Expecto
-open Redis.Streams
 open StackExchange.Redis
 open Hopac
+open FSharp.Control.Redis.Streams.Core
+open FSharp.Control.Redis.Streams.Hopac
 
 let getUniqueKey (keyType : string) (key : string) =
     let suffix = Guid.NewGuid().ToString()
@@ -24,89 +25,6 @@ let rkey (s : string) = RedisKey.op_Implicit s
 let rval (s : string) = RedisValue.op_Implicit s
 let nve name value = NameValueEntry(rval name, rval value)
 
-let sp key position =
-    StreamPosition(key, position)
-
-//special keys
-
-//This special ID means that XREAD should use as last ID the maximum ID already stored in the stream mystream, so that we will receive only new messages, starting from the time we started listening. This is similar to the tail -f Unix command in some way.
-let dollar = "$"
-// Beginning
-let dash = "-"
-// End
-let plus = "+"
-
-let (|EmptySeq|_|) xs =
-    if xs |> Seq.isEmpty then Some EmptySeq
-    else None
-
-let (|Int64|_|) (str: string) =
-    match Int64.TryParse(str) with
-    | (true,v) -> Some v
-    | _ -> None
-
-type EntryId = {
-    MillisecondsTime : int64
-    SequenceNumber : int64
-}
-    with
-        member x.Unparse () =
-            sprintf "%d-%d" x.MillisecondsTime x.SequenceNumber
-
-        member x.ToRedisValue () =
-            x.Unparse() |> RedisValue.op_Implicit
-
-        member x.IncrementSequence () =
-            {x with SequenceNumber = x.SequenceNumber + 1L}
-
-        static member Parse(s : string) =
-            match s.Split('-') |> Array.toList with
-            | [Int64 ms; Int64 sn] -> {MillisecondsTime = ms; SequenceNumber = sn }
-            | [Int64 ms] ->{MillisecondsTime = ms; SequenceNumber = 0L }
-            | _ -> failwithf "invalid EntryId format, should look like 0-0 but was %s" s
-
-        static member Parse(s : RedisValue) =
-            s |> string |> EntryId.Parse
-
-
-type PollOptions = {
-    MaxPollDelay : TimeSpan
-    MaxPollDelayBuckets : float
-    CountToPullATime : int option
-}
-    with
-        static member Default = {
-            MaxPollDelay = TimeSpan.FromMilliseconds(100.)
-            MaxPollDelayBuckets = 10.
-            CountToPullATime = Some 1000
-        }
-
-let inline minTimeSpan (t1 : TimeSpan) (t2 : TimeSpan) =
-    Math.Min(t1.Ticks, t2.Ticks)
-    |> TimeSpan.FromTicks
-
-let pollStreamForever (redisdb : IDatabase) (streamName : RedisKey) (startingPosition : RedisValue) (pollOptions : PollOptions)  =
-    let incPos (rv : RedisValue) = EntryId.Parse(rv).IncrementSequence().ToRedisValue()
-    Stream.unfoldJob(fun (nextPosition, shouldDelay, nextDelayPeriod) -> job {
-        if shouldDelay then
-            do! timeOut pollOptions.MaxPollDelay
-        let! (response : StreamEntry []) = redisdb.StreamRangeAsync(streamName, minId = Nullable(nextPosition), count = (pollOptions.CountToPullATime |> Option.toNullable))
-        match response with
-        | EmptySeq ->
-            let increment = (float pollOptions.MaxPollDelay.Ticks / pollOptions.MaxPollDelayBuckets)
-            let nextPollDelay = nextDelayPeriod + TimeSpan.FromTicks(int64 increment)
-            let nextPollDelay = minTimeSpan nextPollDelay pollOptions.MaxPollDelay
-            return Some (Array.empty, (nextPosition, true, nextPollDelay ))
-        | entries ->
-            let lastEntry = entries |> Seq.last
-            let nextPosition = lastEntry.Id |> incPos
-            return Some (entries, (nextPosition, false, TimeSpan.FromMilliseconds(0.) ))
-    }) (startingPosition, false, TimeSpan.FromMilliseconds(0.))
-    |> Stream.appendMap (Stream.ofSeq)
-
-let pollStreamUntil (redisdb : IDatabase) (streamName : RedisKey) (startingPosition : RedisValue) (pollOptions : PollOptions) (until : Alt<_>) =
-    pollStreamForever redisdb streamName startingPosition pollOptions
-    |> Stream.takeUntil until
 
 
 let failDueToTimeout message (ts : TimeSpan) =
@@ -133,8 +51,7 @@ type StreamExpect<'a> (predicate : seq<'a> -> bool) =
             | Some d -> d
             | None -> ignore
         s
-        //Debuging
-        |> Stream.mapFun(fun x -> x |> printer ; x)
+        |> Stream.mapFun(fun x -> x |> printer ; x)//Debugging
         |> Stream.iterFun(values.Add >> checkPredicate)
         |> start
 
@@ -180,8 +97,8 @@ let tests =
         do! expecter.Await "Should have 2 results" (TimeSpan.FromSeconds(1.)) |> Job.toAsync
     }
 
-    testCaseAsync "Stream should generate 200000 events" <| async {
-        let total = 200000
+    testCaseAsync "Stream should generate 20000 events" <| async {
+        let total = 20000
         let db = redis.GetDatabase()
         let key = getUniqueKey "stream" "Foo"
         let expecter = StreamExpect<_>(fun s -> s |> Seq.length = total)
@@ -205,12 +122,12 @@ let tests =
                 |> Stream.iter
         } |> start
 
-        do! expecter.Await "Should have 200000 results" (TimeSpan.FromSeconds(30.)) |> Job.toAsync
+        do! expecter.Await "Should have 20000 results" (TimeSpan.FromSeconds(30.)) |> Job.toAsync
     }
 
 
     testCaseAsync "Stream should generate large fields" <| async {
-        let total = 20000
+        let total = 200
         let db = redis.GetDatabase()
         let key = getUniqueKey "stream" "Foo"
         let expecter = StreamExpect<_>(fun s -> s |> Seq.length = total)
@@ -221,7 +138,7 @@ let tests =
             do!
                 [0..total]
                 |> Seq.map(fun i ->
-                    let data = ranStr (2000000)
+                    let data = ranStr (20000)
                     let values =
                         [|
                             NameValueEntry (RedisValue.op_Implicit "Field1", RedisValue.op_Implicit data)

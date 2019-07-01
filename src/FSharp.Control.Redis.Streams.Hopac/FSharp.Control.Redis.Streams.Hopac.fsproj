@@ -5,8 +5,8 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
   <PropertyGroup>
-    <Title>FSharp.Control.Redis.Streams</Title>
-    <Description>FSharp.Control.Redis.Streams does the thing!</Description>
+    <Title>FSharp.Control.Redis.Streams.Hopac</Title>
+    <Description>FSharp.Control.Redis.Streams.Hopac does the thing!</Description>
 
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)'=='Release'">
@@ -16,7 +16,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
-    <Compile Include="FSharp.Control.Redis.Streams.fs" />
+    <Compile Include="FSharp.Control.Redis.Streams.Hopac.fs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\FSharp.Control.Redis.Streams\FSharp.Control.Redis.Streams.fsproj" />
   </ItemGroup>
   <!-- <Import Project="..\..\fsc.props" /> -->
   <Import Project="..\..\netfx.props" />
