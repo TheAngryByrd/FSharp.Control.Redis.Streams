@@ -24,8 +24,8 @@ BuildServer.install [
 // Metadata and Configuration
 //-----------------------------------------------------------------------------
 
-let productName = "Redis.Streams"
-let sln = "Redis.Streams.sln"
+let productName = "FSharp.Control.Redis.Streams"
+let sln = "FSharp.Control.Redis.Streams.sln"
 
 let srcGlob =__SOURCE_DIRECTORY__  @@ "src/**/*.??proj"
 let testsGlob = __SOURCE_DIRECTORY__  @@ "tests/**/*.??proj"
@@ -43,7 +43,7 @@ let coverageThresholdPercent = 80
 let coverageReportDir =  __SOURCE_DIRECTORY__  @@ "docs" @@ "coverage"
 
 let gitOwner = "MyGithubUsername"
-let gitRepoName = "Redis.Streams"
+let gitRepoName = "FSharp.Control.Redis.Streams"
 
 let releaseBranch = "master"
 let releaseNotes = Fake.Core.ReleaseNotes.load "RELEASE_NOTES.md"
