@@ -16,7 +16,7 @@ nuget StackExchange.Redis
 nuget Hopac
 nuget Akka.Streams
 nuget TaskBuilder.fs
-
+nuget System.Reactive
 
 // [ FAKE GROUP ]
 group Build

@@ -1,0 +1,5 @@
+FSharp.Core
+Microsoft.SourceLink.GitHub
+StackExchange.Redis
+System.Reactive
+TaskBuilder.fs
