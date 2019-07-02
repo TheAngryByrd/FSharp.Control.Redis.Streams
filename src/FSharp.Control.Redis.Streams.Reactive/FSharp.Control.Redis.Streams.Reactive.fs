@@ -1,6 +1,6 @@
 namespace FSharp.Control.Redis.Streams
 
-module Hopac =
+module Reactive =
     open System
     open System.Threading
     open System.Threading.Tasks
