@@ -1,6 +1,12 @@
 # FSharp.Control.Redis.Streams
 
-[Enter useful description for FSharp.Control.Redis.Streams]
+FSharp.Control.Redis.Streams is a library dedicated to bridging [Redis Streams](https://redis.io/topics/streams-intro) with .NET Streaming technologies.
+
+Currently Supported:
+
+- [Hopac Streams](https://hopac.github.io/Hopac/Hopac.html#def:module%20Hopac.Stream)
+- [Akka.net Streams](https://getakka.net/articles/streams/introduction.html)
+- [Reactive Extensions](http://reactivex.io/)
 
 ---
 
@@ -31,6 +37,16 @@ Make sure the following **requirements** are installed in your system:
 
 * [dotnet SDK](https://www.microsoft.com/net/download/core) 2.0 or higher
 * [Mono](http://www.mono-project.com/) if you're on Linux or macOS.
+* [docker-compose](https://docs.docker.com/compose/)
+
+
+Stand up redis via docker:
+
+```sh
+docker-compose up
+```
+
+Build:
 
 ```
 > build.cmd // on windows
