@@ -10,6 +10,8 @@ mono:
   - weekly # => "latest commits"
 os:
   - linux
+services:
+  - redis-server
 
 script:
   - ./build.sh

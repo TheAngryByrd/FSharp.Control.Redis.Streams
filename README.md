@@ -1,6 +1,12 @@
-# Redis.Streams
+# FSharp.Control.Redis.Streams
 
-[Enter useful description for Redis.Streams]
+FSharp.Control.Redis.Streams is a library dedicated to bridging [Redis Streams](https://redis.io/topics/streams-intro) with .NET Streaming technologies.
+
+Currently Supported:
+
+- [Hopac Streams](https://hopac.github.io/Hopac/Hopac.html#def:module%20Hopac.Stream)
+- [Akka.net Streams](https://getakka.net/articles/streams/introduction.html)
+- [Reactive Extensions](http://reactivex.io/)
 
 ---
 
@@ -8,15 +14,15 @@
 
 MacOS/Linux | Windows
 --- | ---
-[![Travis Badge](https://travis-ci.org/MyGithubUsername/Redis.Streams.svg?branch=master)](https://travis-ci.org/MyGithubUsername/Redis.Streams) | [![Build status](https://ci.appveyor.com/api/projects/status/github/MyGithubUsername/Redis.Streams?svg=true)](https://ci.appveyor.com/project/MyGithubUsername/Redis.Streams)
-[![Build History](https://buildstats.info/travisci/chart/MyGithubUsername/Redis.Streams)](https://travis-ci.org/MyGithubUsername/Redis.Streams/builds) | [![Build History](https://buildstats.info/appveyor/chart/MyGithubUsername/Redis.Streams)](https://ci.appveyor.com/project/MyGithubUsername/Redis.Streams)  
+[![Travis Badge](https://travis-ci.org/TheAngryByrd/FSharp.Control.Redis.Streams.svg?branch=master)](https://travis-ci.org/TheAngryByrd/FSharp.Control.Redis.Streams) | No Redis 5.0 Support On Windows
+[![Build History](https://buildstats.info/travisci/chart/TheAngryByrd/FSharp.Control.Redis.Streams)](https://travis-ci.org/TheAngryByrd/FSharp.Control.Redis.Streams/builds) |   
 
 
 ## Nuget 
 
 Stable | Prerelease
 --- | ---
-[![NuGet Badge](https://buildstats.info/nuget/Redis.Streams)](https://www.nuget.org/packages/Redis.Streams/) | [![NuGet Badge](https://buildstats.info/nuget/Redis.Streams?includePreReleases=true)](https://www.nuget.org/packages/Redis.Streams/)
+[![NuGet Badge](https://buildstats.info/nuget/FSharp.Control.Redis.Streams)](https://www.nuget.org/packages/FSharp.Control.Redis.Streams/) | [![NuGet Badge](https://buildstats.info/nuget/FSharp.Control.Redis.Streams?includePreReleases=true)](https://www.nuget.org/packages/FSharp.Control.Redis.Streams/)
 
 ### Developing
 
@@ -31,6 +37,16 @@ Make sure the following **requirements** are installed in your system:
 
 * [dotnet SDK](https://www.microsoft.com/net/download/core) 2.0 or higher
 * [Mono](http://www.mono-project.com/) if you're on Linux or macOS.
+* [docker-compose](https://docs.docker.com/compose/)
+
+
+Stand up redis via docker:
+
+```sh
+docker-compose up
+```
+
+Build:
 
 ```
 > build.cmd // on windows
@@ -43,6 +59,8 @@ $ ./build.sh  // on unix
   * `CONFIGURATION=Debug ./build.sh` will result in things like `dotnet build -c Debug`
 * `GITHUB_TOKEN` will be used to upload release notes and nuget packages to github.
   * Be sure to set this before releasing
+- `DISABLE_COVERAGE` Will disable running code coverage metrics.  AltCover can have [severe performance degradation](https://github.com/SteveGilham/altcover/issues/57) so it worth disabling when looking to do a quicker feedback loop.
+  - `DISABLE_COVERAGE=1 ./build.sh`
 
 ### Watch Tests
 

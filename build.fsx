@@ -20,6 +20,20 @@ BuildServer.install [
     Travis.Installer
 ]
 
+let environVarAsBoolOrDefault varName defaultValue =
+    let truthyConsts = [
+        "1"
+        "Y"
+        "YES"
+        "T"
+        "TRUE"
+    ]
+    try
+        let envvar = (Environment.environVar varName).ToUpper()
+        truthyConsts |> List.exists((=)envvar)
+    with
+    | _ ->  defaultValue
+
 //-----------------------------------------------------------------------------
 // Metadata and Configuration
 //-----------------------------------------------------------------------------
@@ -42,7 +56,7 @@ let toolsDir = __SOURCE_DIRECTORY__  @@ "tools"
 let coverageThresholdPercent = 80
 let coverageReportDir =  __SOURCE_DIRECTORY__  @@ "docs" @@ "coverage"
 
-let gitOwner = "MyGithubUsername"
+let gitOwner = "TheAngryByrd"
 let gitRepoName = "FSharp.Control.Redis.Streams"
 
 let releaseBranch = "master"
@@ -51,6 +65,9 @@ let releaseNotes = Fake.Core.ReleaseNotes.load "RELEASE_NOTES.md"
 let publishUrl = "https://www.nuget.org"
 
 let paketToolPath = __SOURCE_DIRECTORY__ </> ".paket" </> (if Environment.isWindows then "paket.exe" else "paket")
+
+
+let disableCodeCoverage = environVarAsBoolOrDefault "DISABLE_COVERAGE" false
 
 //-----------------------------------------------------------------------------
 // Helpers
@@ -172,7 +189,7 @@ let dotnetTest ctx =
     let args =
         [
             "--no-build"
-            "/p:AltCover=false"
+            sprintf "/p:AltCover=%b" (not disableCodeCoverage)
             sprintf "/p:AltCoverThreshold=%d" coverageThresholdPercent
             sprintf "/p:AltCoverAssemblyExcludeFilter=%s" excludeCoverage
         ]
@@ -370,7 +387,7 @@ Target.create "Release" ignore
 "DotnetRestore"
     ==> "DotnetBuild"
     ==> "DotnetTest"
-    ==> "GenerateCoverageReport"
+    =?> ("GenerateCoverageReport", not disableCodeCoverage)
     ==> "DotnetPack"
     ==> "SourcelinkTest"
     ==> "PublishToNuget"
