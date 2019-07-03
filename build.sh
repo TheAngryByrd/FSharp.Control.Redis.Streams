@@ -35,4 +35,4 @@ then
   dotnet tool install paket --tool-path "$PAKET_TOOL_PATH"
 fi
 
-FAKE_DETAILED_ERRORS=true "$FAKE" build -t "$@"
+DISABLE_COVERAGE=1 FAKE_DETAILED_ERRORS=true "$FAKE" build -t "$@"
