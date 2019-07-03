@@ -1,6 +1,6 @@
-# Redis.Streams
+# FSharp.Control.Redis.Streams
 
-[Enter useful description for Redis.Streams]
+[Enter useful description for FSharp.Control.Redis.Streams]
 
 ---
 
@@ -8,15 +8,15 @@
 
 MacOS/Linux | Windows
 --- | ---
-[![Travis Badge](https://travis-ci.org/MyGithubUsername/Redis.Streams.svg?branch=master)](https://travis-ci.org/MyGithubUsername/Redis.Streams) | [![Build status](https://ci.appveyor.com/api/projects/status/github/MyGithubUsername/Redis.Streams?svg=true)](https://ci.appveyor.com/project/MyGithubUsername/Redis.Streams)
-[![Build History](https://buildstats.info/travisci/chart/MyGithubUsername/Redis.Streams)](https://travis-ci.org/MyGithubUsername/Redis.Streams/builds) | [![Build History](https://buildstats.info/appveyor/chart/MyGithubUsername/Redis.Streams)](https://ci.appveyor.com/project/MyGithubUsername/Redis.Streams)  
+[![Travis Badge](https://travis-ci.org/TheAngryByrd/FSharp.Control.Redis.Streams.svg?branch=master)](https://travis-ci.org/TheAngryByrd/FSharp.Control.Redis.Streams) | No Redis 5.0 Support On Windows
+[![Build History](https://buildstats.info/travisci/chart/TheAngryByrd/FSharp.Control.Redis.Streams)](https://travis-ci.org/TheAngryByrd/FSharp.Control.Redis.Streams/builds) |   
 
 
 ## Nuget 
 
 Stable | Prerelease
 --- | ---
-[![NuGet Badge](https://buildstats.info/nuget/Redis.Streams)](https://www.nuget.org/packages/Redis.Streams/) | [![NuGet Badge](https://buildstats.info/nuget/Redis.Streams?includePreReleases=true)](https://www.nuget.org/packages/Redis.Streams/)
+[![NuGet Badge](https://buildstats.info/nuget/FSharp.Control.Redis.Streams)](https://www.nuget.org/packages/FSharp.Control.Redis.Streams/) | [![NuGet Badge](https://buildstats.info/nuget/FSharp.Control.Redis.Streams?includePreReleases=true)](https://www.nuget.org/packages/FSharp.Control.Redis.Streams/)
 
 ### Developing
 

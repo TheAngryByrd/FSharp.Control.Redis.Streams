@@ -42,7 +42,7 @@ let toolsDir = __SOURCE_DIRECTORY__  @@ "tools"
 let coverageThresholdPercent = 80
 let coverageReportDir =  __SOURCE_DIRECTORY__  @@ "docs" @@ "coverage"
 
-let gitOwner = "MyGithubUsername"
+let gitOwner = "TheAngryByrd"
 let gitRepoName = "FSharp.Control.Redis.Streams"
 
 let releaseBranch = "master"
