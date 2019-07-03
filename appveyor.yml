@@ -5,6 +5,10 @@ build_script:
 test: off
 version: 0.0.1.{build}
 image: Visual Studio 2017
+install:
+- nuget install redis-64 -ExcludeVersion
+- redis-64\tools\redis-server.exe --service-install
+- redis-64\tools\redis-server.exe --service-start
 artifacts:
   - path: bin
     name: bin
