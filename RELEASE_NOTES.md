@@ -1,2 +1,2 @@
-#### 0.1.0 - 2017-03-17
-* Initial release
+#### 0.1.0-beta001 - 2019-07-02
+* FEATURE: Initial Release
