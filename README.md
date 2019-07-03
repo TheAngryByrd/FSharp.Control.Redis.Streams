@@ -20,9 +20,13 @@ MacOS/Linux | Windows
 
 ## Nuget 
 
-Stable | Prerelease
---- | ---
-[![NuGet Badge](https://buildstats.info/nuget/FSharp.Control.Redis.Streams)](https://www.nuget.org/packages/FSharp.Control.Redis.Streams/) | [![NuGet Badge](https://buildstats.info/nuget/FSharp.Control.Redis.Streams?includePreReleases=true)](https://www.nuget.org/packages/FSharp.Control.Redis.Streams/)
+Package Name |Stable | Prerelease
+--- | --- | ---
+FSharp.Control.Redis.Streams |[![NuGet Badge](https://buildstats.info/nuget/FSharp.Control.Redis.Streams)](https://www.nuget.org/packages/FSharp.Control.Redis.Streams/) | [![NuGet Badge](https://buildstats.info/nuget/FSharp.Control.Redis.Streams?includePreReleases=true)](https://www.nuget.org/packages/FSharp.Control.Redis.Streams/)
+FSharp.Control.Redis.Streams.Akka | [![NuGet Badge](https://buildstats.info/nuget/FSharp.Control.Redis.Streams.Akka)](https://www.nuget.org/packages/FSharp.Control.Redis.Streams.Akka/) | [![NuGet Badge](https://buildstats.info/nuget/FSharp.Control.Redis.Streams.Akka?includePreReleases=true)](https://www.nuget.org/packages/FSharp.Control.Redis.Streams.Akka/)
+FSharp.Control.Redis.Streams.Hopac | [![NuGet Badge](https://buildstats.info/nuget/FSharp.Control.Redis.Streams.Hopac)](https://www.nuget.org/packages/FSharp.Control.Redis.Streams.Hopac/) | [![NuGet Badge](https://buildstats.info/nuget/FSharp.Control.Redis.Streams.Hopac?includePreReleases=true)](https://www.nuget.org/packages/FSharp.Control.Redis.Streams.Hopac/)
+FSharp.Control.Redis.Streams.Reactive | [![NuGet Badge](https://buildstats.info/nuget/FSharp.Control.Redis.Streams.Reactive)](https://www.nuget.org/packages/FSharp.Control.Redis.Streams.Reactive/) | [![NuGet Badge](https://buildstats.info/nuget/FSharp.Control.Redis.Streams.Reactive?includePreReleases=true)](https://www.nuget.org/packages/FSharp.Control.Redis.Streams.Reactive/)
+
 
 ### Developing
 
