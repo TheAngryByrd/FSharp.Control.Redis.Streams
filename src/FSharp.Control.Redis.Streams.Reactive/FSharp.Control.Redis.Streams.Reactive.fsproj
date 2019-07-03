@@ -6,7 +6,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <Title>FSharp.Control.Redis.Streams.Reactive</Title>
-    <Description>FSharp.Control.Redis.Streams.Reactive does the thing!</Description>
+    <Description>FSharp.Control.Redis.Streams is a library dedicated to bridging [Redis Streams](https://redis.io/topics/streams-intro) with .NET Streaming technologies. This bridges Reactive Extensions.</Description>
 
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)'=='Release'">

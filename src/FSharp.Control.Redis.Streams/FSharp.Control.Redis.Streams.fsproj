@@ -6,7 +6,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <Title>FSharp.Control.Redis.Streams</Title>
-    <Description>FSharp.Control.Redis.Streams does the thing!</Description>
+    <Description>FSharp.Control.Redis.Streams is a library dedicated to bridging [Redis Streams](https://redis.io/topics/streams-intro) with .NET Streaming technologies.</Description>
 
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)'=='Release'">
