@@ -62,3 +62,7 @@ module Core =
                 CountToPullATime = Some 1000
                 CommandFlags = CommandFlags.None
             }
+            member self.CalculateNextPollDelay (currentPollDelay : TimeSpan) =
+                let increment = (float self.MaxPollDelay.Ticks / self.MaxPollDelayBuckets)
+                let nextPollDelay = currentPollDelay + TimeSpan.FromTicks(int64 increment)
+                TimeSpan.Min nextPollDelay self.MaxPollDelay

@@ -29,7 +29,7 @@ module Reactive =
                             let! (response : StreamEntry []) = redisdb.StreamRangeAsync(streamName, minId = Nullable(nextPosition), count = (Option.toNullable pollOptions.CountToPullATime))
                             match response with
                             | EmptySeq ->
-                                nextPollDelay <- calculateNextPollDelay nextPollDelay
+                                nextPollDelay <-  pollOptions.CalculateNextPollDelay nextPollDelay
                                 do! Task.Delay(nextPollDelay, ct)
                             | entries ->
                                 let lastEntry = Seq.last entries
