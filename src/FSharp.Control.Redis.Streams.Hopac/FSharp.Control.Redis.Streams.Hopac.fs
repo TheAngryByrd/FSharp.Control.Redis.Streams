@@ -21,6 +21,6 @@ module Hopac =
                 let nextPosition = EntryId.CalculateNextPosition lastEntry.Id
                 let nextPollDelay = TimeSpan.Zero
                 return Some (entries, (nextPosition, nextPollDelay))
-        }) (startingPosition, TimeSpan.FromMilliseconds(0.))
+        }) (startingPosition, TimeSpan.Zero)
         |> Stream.appendMap (Stream.ofSeq)
 
