@@ -17,6 +17,7 @@ nuget Hopac
 nuget Akka.Streams
 nuget TaskBuilder.fs
 nuget System.Reactive
+nuget Expecto.Hopac
 
 // [ FAKE GROUP ]
 group Build

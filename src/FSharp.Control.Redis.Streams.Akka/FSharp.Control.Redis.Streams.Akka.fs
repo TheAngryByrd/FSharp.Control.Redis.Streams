@@ -22,12 +22,10 @@ module Akka =
 
     let pollStreamForever (redisdb : IDatabase) (streamName : RedisKey) (startingPosition : RedisValue) (pollOptions : PollOptions) =
 
-
         Streams.taskUnfold (fun (nextPosition, pollDelay) -> task {
-
             let! (response : StreamEntry []) = redisdb.StreamRangeAsync(streamName, minId = Nullable(nextPosition), count = (Option.toNullable pollOptions.CountToPullATime))
             match response with
-            | EmptySeq ->
+            | EmptyArray ->
                 let nextPollDelay = pollOptions.CalculateNextPollDelay pollDelay
                 do! Task.Delay pollDelay
                 return Some ((nextPosition, nextPollDelay ) , Array.empty )

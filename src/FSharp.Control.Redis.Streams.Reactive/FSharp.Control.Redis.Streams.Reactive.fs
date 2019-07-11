@@ -12,11 +12,6 @@ module Reactive =
 
 
     let pollStreamForever (redisdb : IDatabase) (streamName : RedisKey) (startingPosition : RedisValue) (pollOptions : PollOptions) =
-        let calculateNextPollDelay (nextPollDelay) =
-            let increment = (float pollOptions.MaxPollDelay.Ticks / pollOptions.MaxPollDelayBuckets)
-            let nextPollDelay = nextPollDelay + TimeSpan.FromTicks(int64 increment)
-            TimeSpan.Min nextPollDelay pollOptions.MaxPollDelay
-
         Observable.Create(fun (obs : IObserver<_>) ->
             let cts = new CancellationTokenSource()
             let ct = cts.Token
@@ -28,7 +23,7 @@ module Reactive =
                         while not ct.IsCancellationRequested do
                             let! (response : StreamEntry []) = redisdb.StreamRangeAsync(streamName, minId = Nullable(nextPosition), count = (Option.toNullable pollOptions.CountToPullATime))
                             match response with
-                            | EmptySeq ->
+                            | EmptyArray ->
                                 nextPollDelay <-  pollOptions.CalculateNextPollDelay nextPollDelay
                                 do! Task.Delay(nextPollDelay, ct)
                             | entries ->
