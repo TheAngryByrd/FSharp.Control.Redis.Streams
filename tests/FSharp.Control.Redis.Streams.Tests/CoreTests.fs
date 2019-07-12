@@ -21,13 +21,13 @@ module Core =
 
             test "Int64 matches int64" {
                 match "123" with
-                | Int64 i -> ()
+                | UInt64 i -> ()
                 | _ -> failtestf "Should be int64"
             }
 
             test "Int64 doesn't match float" {
                 match "123.456" with
-                | Int64 i -> failtestf "Should be int64"
+                | UInt64 i -> failtestf "Should be int64"
                 | _ -> ()
             }
         ]

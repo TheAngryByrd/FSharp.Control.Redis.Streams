@@ -9,8 +9,8 @@ open FSharp.Control.Redis.Streams.Core
 let coreTests =
     testList "EntityId tests" [
         test "Parse parses millisecond and sequence" {
-            let milliseconds = 100000L
-            let sequenceId = 4L
+            let milliseconds = 100000UL
+            let sequenceId = 4UL
             let expectedEntryId = {
                 MillisecondsTime = milliseconds
                 SequenceNumber =sequenceId
@@ -23,10 +23,10 @@ let coreTests =
         }
 
         test "Parse parses millisecond" {
-            let milliseconds = 100000L
+            let milliseconds = 100000UL
             let expectedEntryId = {
                 MillisecondsTime = milliseconds
-                SequenceNumber = 0L
+                SequenceNumber = 0UL
             }
             let entryIdStr = (sprintf "%d" milliseconds )
             let actualEntryId = EntryId.Parse entryIdStr
@@ -34,14 +34,39 @@ let coreTests =
             Expect.equal actualEntryId expectedEntryId "Should parse EntryId"
         }
 
-        test "CalculateNextPosition" {
-            let milliseconds = 100000L
+        test "IncrementSequence" {
+            let milliseconds = 100000UL
             let currentEntry = {
                 MillisecondsTime = milliseconds
-                SequenceNumber = 0L
+                SequenceNumber = 0UL
             }
             let expectedEntryId = RedisValue.op_Implicit (sprintf "%d-1" milliseconds)
             let actualEntryId = currentEntry.IncrementSequence().ToRedisValue()
+
+            Expect.equal actualEntryId expectedEntryId "Should parse EntryId"
+        }
+
+
+        test "DecrementSequence when SequenceNumber > 1" {
+            let milliseconds = 100000UL
+            let currentEntry = {
+                MillisecondsTime = milliseconds
+                SequenceNumber = 1UL
+            }
+            let expectedEntryId = RedisValue.op_Implicit (sprintf "%d-0" milliseconds)
+            let actualEntryId = currentEntry.DecrementSequence().ToRedisValue()
+
+            Expect.equal actualEntryId expectedEntryId "Should parse EntryId"
+        }
+
+        test "DecrementSequence when SequenceNumber = 1" {
+            let milliseconds = 100000UL
+            let currentEntry = {
+                MillisecondsTime = milliseconds
+                SequenceNumber = 0UL
+            }
+            let expectedEntryId = RedisValue.op_Implicit (sprintf "%d-%d" (milliseconds - 1UL) UInt64.MaxValue)
+            let actualEntryId = currentEntry.DecrementSequence().ToRedisValue()
 
             Expect.equal actualEntryId expectedEntryId "Should parse EntryId"
         }

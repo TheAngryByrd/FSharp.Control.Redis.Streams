@@ -67,7 +67,7 @@ let publishUrl = "https://www.nuget.org"
 let paketToolPath = __SOURCE_DIRECTORY__ </> ".paket" </> (if Environment.isWindows then "paket.exe" else "paket")
 
 
-let disableCodeCoverage = environVarAsBoolOrDefault "DISABLE_COVERAGE" false
+let disableCodeCoverage = environVarAsBoolOrDefault "DISABLE_COVERAGE" true
 
 //-----------------------------------------------------------------------------
 // Helpers
