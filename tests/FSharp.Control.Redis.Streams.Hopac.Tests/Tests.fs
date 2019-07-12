@@ -112,7 +112,7 @@ let redis = ConnectionMultiplexer.Connect(options)
 let pollStreamForeverTests =
     // testSequenced <|
     testList "pollStreamForever" [
-    testCaseAsync "Stream should generate 2 events" <| async {
+    testCaseJob "Stream should generate 2 events" <| job {
         let db = redis.GetDatabase()
         let streamName = getUniqueStreamKey "StreamGenerate2Events"
         use _ = disposableStream db streamName
@@ -125,17 +125,17 @@ let pollStreamForeverTests =
                 nve "Field1" "Value1"
                 nve "Field2" "Value3"
             |]
-        let! x = db.StreamAddAsync(streamName, values) |> Async.AwaitTask
+        let! x = db.StreamAddAsync(streamName, values)
         let values =
             [|
                 nve "Field1" "Value4"
                 nve "Field2" "Value6"
             |]
-        let! x = db.StreamAddAsync(streamName, values) |> Async.AwaitTask
-        do! expecter.Await "Should have 2 results" (TimeSpan.FromSeconds(1.)) |> Job.toAsync
+        let! x = db.StreamAddAsync(streamName, values)
+        do! expecter.Await "Should have 2 results" (TimeSpan.FromSeconds(1.))
     }
 
-    testCaseAsync "Stream should generate large number of events" <| async {
+    testCaseJob "Stream should generate large number of events" <| job {
         let numberOfEvents = 20000
         let db = redis.GetDatabase()
         let streamName = getUniqueStreamKey  "StreamGenerate20000Events"
@@ -150,11 +150,11 @@ let pollStreamForeverTests =
         |> start
 
 
-        do! expecter.Await (sprintf "Should have %d results" numberOfEvents) (TimeSpan.FromSeconds(30.)) |> Job.toAsync
+        do! expecter.Await (sprintf "Should have %d results" numberOfEvents) (TimeSpan.FromSeconds(30.))
     }
 
 
-    testCaseAsync "Stream should generate large fields" <| async {
+    testCaseJob "Stream should generate large fields" <| job {
         let numberOfEvents = 200
         let db = redis.GetDatabase()
         let streamName = getUniqueStreamKey  "StreamGenerateLargeField"
@@ -167,7 +167,7 @@ let pollStreamForeverTests =
         |> Job.Ignore
         |> start
 
-        do! expecter.Await "Should have 200 results" (TimeSpan.FromSeconds(30.)) |> Job.toAsync
+        do! expecter.Await "Should have 200 results" (TimeSpan.FromSeconds(30.))
     }
 
 ]
@@ -178,12 +178,12 @@ let pollStreamForeverTests =
 let readFromStreamTests =
     // testSequenced <|
     testList "readFromStream" [
-        testCaseAsync "Read forward all Ascending" <| async {
+        testCaseJob "Read forward all Ascending" <| job {
             let numberOfEvents = 10
             let db = redis.GetDatabase()
             let streamName = getUniqueStreamKey "ReadForwardAll"
             use _ = disposableStream db streamName
-            let! data = generateDataForStreamCon db streamName numberOfEvents 200 |> Job.toAsync
+            let! data = generateDataForStreamCon db streamName numberOfEvents 200
 
             let expecter = StreamExpect<_>(fun s -> s |> Seq.length = numberOfEvents)
 
@@ -191,7 +191,7 @@ let readFromStreamTests =
             |> readFromStream db
             |> expecter.CaptureFromStream
 
-            do! expecter.Await (sprintf "Should have %d results" numberOfEvents) (TimeSpan.FromSeconds(10.)) |> Job.toAsync
+            do! expecter.Await (sprintf "Should have %d results" numberOfEvents) (TimeSpan.FromSeconds(10.))
             let actualValues =
                 expecter.Values
                 |> Seq.collect(fun v -> v.Values)
@@ -204,12 +204,12 @@ let readFromStreamTests =
             Expect.sequenceEqual actualValues expected "Should be same order"
         }
 
-        testCaseAsync "Read forward withCountToPull Ascending" <| async {
+        testCaseJob "Read forward withCountToPull Ascending" <| job {
             let numberOfEvents = 10
             let db = redis.GetDatabase()
             let streamName = getUniqueStreamKey "ReadForwardwithCountToPull"
             use _ = disposableStream db streamName
-            let! data= generateDataForStreamCon db streamName numberOfEvents 200 |> Job.toAsync
+            let! data= generateDataForStreamCon db streamName numberOfEvents 200
 
             let expecter = StreamExpect<_>(fun s -> s |> Seq.length = numberOfEvents)
 
@@ -218,7 +218,7 @@ let readFromStreamTests =
             |> readFromStream db
             |> expecter.CaptureFromStream
 
-            do! expecter.Await (sprintf "Should have %d results" numberOfEvents) (TimeSpan.FromSeconds(10.)) |> Job.toAsync
+            do! expecter.Await (sprintf "Should have %d results" numberOfEvents) (TimeSpan.FromSeconds(10.))
             let actualValues =
                 expecter.Values
                 |> Seq.collect(fun v -> v.Values)
@@ -231,12 +231,12 @@ let readFromStreamTests =
             Expect.sequenceEqual actualValues expected "Should be same order"
         }
 
-        testCaseAsync "Read backward all" <| async {
+        testCaseJob "Read backward all" <| job {
             let numberOfEvents = 10
             let db = redis.GetDatabase()
             let streamName = getUniqueStreamKey "ReadbackwardAll"
             use _ = disposableStream db streamName
-            let! data= generateDataForStreamCon db streamName numberOfEvents 200 |> Job.toAsync
+            let! data= generateDataForStreamCon db streamName numberOfEvents 200
 
             let expecter = StreamExpect<_>(fun s -> s |> Seq.length = numberOfEvents)
 
@@ -245,7 +245,7 @@ let readFromStreamTests =
             |> readFromStream db
             |> expecter.CaptureFromStream
 
-            do! expecter.Await (sprintf "Should have %d results" numberOfEvents) (TimeSpan.FromSeconds(10.)) |> Job.toAsync
+            do! expecter.Await (sprintf "Should have %d results" numberOfEvents) (TimeSpan.FromSeconds(10.))
             let actualValues =
                 expecter.Values
                 |> Seq.collect(fun v -> v.Values)
@@ -259,12 +259,12 @@ let readFromStreamTests =
             Expect.sequenceEqual actualValues expected  "Should be same order"
         }
 
-        testCaseAsync "Read backward count" <| async {
+        testCaseJob "Read backward count" <| job {
             let numberOfEvents = 10
             let db = redis.GetDatabase()
             let streamName = getUniqueStreamKey "Readbackwardcount"
             use _ = disposableStream db streamName
-            let! data= generateDataForStreamCon db streamName numberOfEvents 200 |> Job.toAsync
+            let! data= generateDataForStreamCon db streamName numberOfEvents 200
 
             let expecter = StreamExpect<_>(fun s -> s |> Seq.length = numberOfEvents)
 
@@ -274,7 +274,7 @@ let readFromStreamTests =
             |> readFromStream db
             |> expecter.CaptureFromStream
 
-            do! expecter.Await (sprintf "Should have %d results" numberOfEvents) (TimeSpan.FromSeconds(10.)) |> Job.toAsync
+            do! expecter.Await (sprintf "Should have %d results" numberOfEvents) (TimeSpan.FromSeconds(10.))
             let actualValues =
                 expecter.Values
                 |> Seq.collect(fun v -> v.Values)
