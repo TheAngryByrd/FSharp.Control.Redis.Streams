@@ -11,7 +11,7 @@ module Reactive =
     open FSharp.Control.Tasks.V2.ContextInsensitive
 
     module Observable =
-        let taskUnfold (fn: 's -> Task<('s * 'e) option>) (state: 's) =
+        let taskUnfold (fn: 's -> CancellationToken -> Task<('s * 'e) option>) (state: 's) =
             Observable.Create(fun (obs : IObserver<_>) ->
                 let cts = new CancellationTokenSource()
                 let ct = cts.Token
@@ -21,7 +21,7 @@ module Reactive =
                     try
                         try
                             while not ct.IsCancellationRequested || not isFinished do
-                                let! result = fn innerState
+                                let! result = fn innerState ct
                                 match result with
                                 | Some (newState, output) ->
                                     innerState <- newState
@@ -41,7 +41,7 @@ module Reactive =
             observable.SelectMany (fun x -> x :> seq<_>)
 
     let pollStreamForever (redisdb : IDatabase) (streamName : RedisKey) (startingPosition : RedisValue) (pollOptions : PollOptions) =
-        Observable.taskUnfold (fun (nextPosition, pollDelay) -> task {
+        Observable.taskUnfold (fun (nextPosition, pollDelay) ct -> task {
             let! (response : StreamEntry []) = redisdb.StreamRangeAsync(streamName, minId = Nullable(nextPosition), count = (Option.toNullable pollOptions.CountToPullATime))
             match response with
             | EmptyArray ->
