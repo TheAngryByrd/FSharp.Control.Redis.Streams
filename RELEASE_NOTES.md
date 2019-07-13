@@ -1,2 +1,3 @@
-#### 0.1.0-beta002 - 2019-07-02
-* FEATURE: Initial Release
+#### 0.1.0-beta003 - 2019-07-12
+* FEATURE: Implements pollStreamForever
+* FEATURE: Implements readFromStream

@@ -2,7 +2,7 @@
 namespace System
 open System.Reflection
 
-[<assembly: AssemblyTitleAttribute("FSharp.Control.Redis.Streams.Hopac")>]
+[<assembly: AssemblyTitleAttribute("FSharp.Control.Redis.Streams.Infrastructure.Tests")>]
 [<assembly: AssemblyProductAttribute("FSharp.Control.Redis.Streams")>]
 [<assembly: AssemblyVersionAttribute("0.1.0")>]
 [<assembly: AssemblyMetadataAttribute("ReleaseDate","2019-07-12T00:00:00.0000000")>]
@@ -13,7 +13,7 @@ open System.Reflection
 do ()
 
 module internal AssemblyVersionInformation =
-    let [<Literal>] AssemblyTitle = "FSharp.Control.Redis.Streams.Hopac"
+    let [<Literal>] AssemblyTitle = "FSharp.Control.Redis.Streams.Infrastructure.Tests"
     let [<Literal>] AssemblyProduct = "FSharp.Control.Redis.Streams"
     let [<Literal>] AssemblyVersion = "0.1.0"
     let [<Literal>] AssemblyMetadata_ReleaseDate = "2019-07-12T00:00:00.0000000"
