@@ -99,7 +99,7 @@ module Reactive =
             | Order.Descending -> EntryId.CalculateNextPositionDesc
             | _ -> failureForMessageOrderCheck ()
 
-        Observable.taskUnfold(fun nextPosition -> task {
+        Observable.taskUnfold(fun nextPosition ct -> task {
             let! (response : StreamEntry []) = readStream nextPosition
             match response with
             | EmptyArray ->
