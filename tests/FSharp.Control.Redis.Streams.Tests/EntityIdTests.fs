@@ -41,9 +41,21 @@ let coreTests =
                 SequenceNumber = 0UL
             }
             let expectedEntryId = RedisValue.op_Implicit (sprintf "%d-1" milliseconds)
-            let actualEntryId = currentEntry.IncrementSequence().ToRedisValue()
+            let actualEntryId = currentEntry.Increment().ToRedisValue()
 
-            Expect.equal actualEntryId expectedEntryId "Should parse EntryId"
+            Expect.equal actualEntryId expectedEntryId "Should Increment EntryId"
+        }
+
+        test "IncrementSequence when SequenceNumber = UInt64.Max" {
+            let milliseconds = 100000UL
+            let currentEntry = {
+                MillisecondsTime = milliseconds
+                SequenceNumber = UInt64.MaxValue
+            }
+            let expectedEntryId = RedisValue.op_Implicit (sprintf "%d-0" (milliseconds + 1UL))
+            let actualEntryId = currentEntry.Increment().ToRedisValue()
+
+            Expect.equal actualEntryId expectedEntryId "Should Increment EntryId"
         }
 
 
@@ -54,9 +66,9 @@ let coreTests =
                 SequenceNumber = 1UL
             }
             let expectedEntryId = RedisValue.op_Implicit (sprintf "%d-0" milliseconds)
-            let actualEntryId = currentEntry.DecrementSequence().ToRedisValue()
+            let actualEntryId = currentEntry.Decrement().ToRedisValue()
 
-            Expect.equal actualEntryId expectedEntryId "Should parse EntryId"
+            Expect.equal actualEntryId expectedEntryId "Should Decrement EntryId"
         }
 
         test "DecrementSequence when SequenceNumber = 0" {
@@ -66,8 +78,8 @@ let coreTests =
                 SequenceNumber = 0UL
             }
             let expectedEntryId = RedisValue.op_Implicit (sprintf "%d-%d" (milliseconds - 1UL) UInt64.MaxValue)
-            let actualEntryId = currentEntry.DecrementSequence().ToRedisValue()
+            let actualEntryId = currentEntry.Decrement().ToRedisValue()
 
-            Expect.equal actualEntryId expectedEntryId "Should parse EntryId"
+            Expect.equal actualEntryId expectedEntryId "Should Decrement EntryId"
         }
     ]

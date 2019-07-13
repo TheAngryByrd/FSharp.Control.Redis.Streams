@@ -101,7 +101,7 @@ module Core =
         match UInt64.TryParse(str) with
         | (true,v) -> Some v
         | _ -> None
-
+    [<Struct>]
     type EntryId = {
         MillisecondsTime : uint64
         SequenceNumber : uint64
@@ -113,21 +113,29 @@ module Core =
             member x.ToRedisValue () =
                 x.Unparse() |> RedisValue.op_Implicit
 
-            member x.IncrementSequence () =
+            member x.Increment () =
                 if x.SequenceNumber = UInt64.MaxValue then
-                    { x with
+                    {
                         MillisecondsTime = x.MillisecondsTime + 1UL
-                        SequenceNumber = 0UL }
+                        SequenceNumber = 0UL
+                    }
                 else
-                {x with SequenceNumber = x.SequenceNumber + 1UL}
+                    {
+                        MillisecondsTime = x.MillisecondsTime
+                        SequenceNumber = x.SequenceNumber + 1UL
+                    }
 
-            member x.DecrementSequence () =
+            member x.Decrement () =
                 if x.SequenceNumber = 0UL then
-                    {x with
+                    {
                         MillisecondsTime = x.MillisecondsTime - 1UL
-                        SequenceNumber = UInt64.MaxValue}
+                        SequenceNumber = UInt64.MaxValue
+                    }
                 else
-                    {x with SequenceNumber = x.SequenceNumber - 1UL}
+                    {
+                        MillisecondsTime = x.MillisecondsTime
+                        SequenceNumber = x.SequenceNumber - 1UL
+                    }
 
             static member Parse(s : string) =
                 match s.Split('-') |> Array.toList with
@@ -139,10 +147,10 @@ module Core =
                 rv |> string |> EntryId.Parse
 
             static member CalculateNextPositionIncr (rv : RedisValue) =
-                EntryId.Parse(rv).IncrementSequence().ToRedisValue()
+                EntryId.Parse(rv).Increment().ToRedisValue()
 
             static member CalculateNextPositionDesc (rv : RedisValue) =
-                EntryId.Parse(rv).DecrementSequence().ToRedisValue()
+                EntryId.Parse(rv).Decrement().ToRedisValue()
 
     type PollOptions = {
         MaxPollDelay : TimeSpan
