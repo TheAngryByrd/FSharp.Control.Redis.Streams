@@ -16,6 +16,7 @@ let getUniqueKey (keyType : string) (key : string) =
 let getUniqueStreamKey (key : string) =
     getUniqueKey "stream" key
 
+// No way to delete a stream, so setting the max size to 1.  It's close enough for now.
 let disposableStream (db : IDatabase) (streamName : RedisKey) = {
     new IDisposable with
         member x.Dispose () = db.StreamTrim(streamName,1) |> ignore
@@ -82,17 +83,17 @@ type StreamExpect<'a> (predicate : seq<'a> -> bool) =
     member this.Values
         with get () = values
 
-
     member this.DebugPrint
         with get () = debugPrint
         and  set (v) = debugPrint <- v
+
     member this.CaptureFromStream (s : Stream<'a>) =
         let printer =
             match debugPrint with
             | Some d -> d
             | None -> ignore
         s
-        |> Stream.mapFun(fun x -> x |> printer ; x)//Debugging
+        |> Stream.mapFun(fun x -> x |> printer ; x) //Debugging
         |> Stream.iterFun(values.Add >> checkPredicate)
         |> start
 
@@ -117,6 +118,7 @@ let pollStreamForeverTests =
         let streamName = getUniqueStreamKey "StreamGenerate2Events"
         use _ = disposableStream db streamName
         let expecter = StreamExpect<_>(fun s -> s |> Seq.length = 2)
+
         pollStreamForever db streamName StreamPosition.Beginning PollOptions.Default
         |> expecter.CaptureFromStream
 
@@ -132,6 +134,7 @@ let pollStreamForeverTests =
                 nve "Field2" "Value6"
             |]
         let! x = db.StreamAddAsync(streamName, values)
+
         do! expecter.Await "Should have 2 results" (TimeSpan.FromSeconds(1.))
     }
 

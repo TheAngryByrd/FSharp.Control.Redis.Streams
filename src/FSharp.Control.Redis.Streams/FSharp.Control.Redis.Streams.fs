@@ -1,7 +1,6 @@
 namespace FSharp.Control.Redis.Streams
 
 open System
-open System.Runtime.CompilerServices
 open StackExchange.Redis
 
 type ReadStreamConfig = {
@@ -115,6 +114,11 @@ module Core =
                 x.Unparse() |> RedisValue.op_Implicit
 
             member x.IncrementSequence () =
+                if x.SequenceNumber = UInt64.MaxValue then
+                    { x with
+                        MillisecondsTime = x.MillisecondsTime + 1UL
+                        SequenceNumber = 0UL }
+                else
                 {x with SequenceNumber = x.SequenceNumber + 1UL}
 
             member x.DecrementSequence () =
@@ -134,7 +138,7 @@ module Core =
             static member Parse(rv : RedisValue) =
                 rv |> string |> EntryId.Parse
 
-            static member CalculateNextPosition (rv : RedisValue) =
+            static member CalculateNextPositionIncr (rv : RedisValue) =
                 EntryId.Parse(rv).IncrementSequence().ToRedisValue()
 
             static member CalculateNextPositionDesc (rv : RedisValue) =

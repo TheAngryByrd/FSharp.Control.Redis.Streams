@@ -31,7 +31,7 @@ module Akka =
                 return Some ((nextPosition, nextPollDelay ) , Array.empty )
             | entries ->
                 let lastEntry = Seq.last entries
-                let nextPosition = EntryId.CalculateNextPosition lastEntry.Id
+                let nextPosition = EntryId.CalculateNextPositionIncr lastEntry.Id
                 let nextPollDelay = TimeSpan.Zero
                 return Some ((nextPosition, nextPollDelay), entries )
 

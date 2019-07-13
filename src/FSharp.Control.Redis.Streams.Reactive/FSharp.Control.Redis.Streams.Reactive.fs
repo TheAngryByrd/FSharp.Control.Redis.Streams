@@ -10,7 +10,6 @@ module Reactive =
     open FSharp.Control.Redis.Streams.Core
     open FSharp.Control.Tasks.V2.ContextInsensitive
 
-
     let pollStreamForever (redisdb : IDatabase) (streamName : RedisKey) (startingPosition : RedisValue) (pollOptions : PollOptions) =
         Observable.Create(fun (obs : IObserver<_>) ->
             let cts = new CancellationTokenSource()
@@ -28,7 +27,7 @@ module Reactive =
                                 do! Task.Delay(nextPollDelay, ct)
                             | entries ->
                                 let lastEntry = Seq.last entries
-                                nextPosition <- EntryId.CalculateNextPosition lastEntry.Id
+                                nextPosition <- EntryId.CalculateNextPositionIncr lastEntry.Id
                                 nextPollDelay <- TimeSpan.Zero
                                 entries |> Array.iter obs.OnNext
                         obs.OnCompleted()

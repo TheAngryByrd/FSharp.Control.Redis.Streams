@@ -59,7 +59,7 @@ let coreTests =
             Expect.equal actualEntryId expectedEntryId "Should parse EntryId"
         }
 
-        test "DecrementSequence when SequenceNumber = 1" {
+        test "DecrementSequence when SequenceNumber = 0" {
             let milliseconds = 100000UL
             let currentEntry = {
                 MillisecondsTime = milliseconds
