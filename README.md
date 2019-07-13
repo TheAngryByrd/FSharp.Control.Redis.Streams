@@ -15,7 +15,7 @@ Currently Supported:
 MacOS/Linux | Windows
 --- | ---
 [![Travis Badge](https://travis-ci.org/TheAngryByrd/FSharp.Control.Redis.Streams.svg?branch=master)](https://travis-ci.org/TheAngryByrd/FSharp.Control.Redis.Streams) | No Redis 5.0 Support On Windows
-[![Build History](https://buildstats.info/travisci/chart/TheAngryByrd/FSharp.Control.Redis.Streams)](https://travis-ci.org/TheAngryByrd/FSharp.Control.Redis.Streams/builds) |   
+[![Build History](https://buildstats.info/travisci/chart/TheAngryByrd/FSharp.Control.Redis.Streams)](https://travis-ci.org/TheAngryByrd/FSharp.Control.Redis.Streams/builds) | No Redis 5.0 Support On Windows
 
 
 ## Nuget 

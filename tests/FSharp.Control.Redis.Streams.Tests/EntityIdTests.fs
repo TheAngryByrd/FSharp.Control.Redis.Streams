@@ -34,7 +34,7 @@ let coreTests =
             Expect.equal actualEntryId expectedEntryId "Should parse EntryId"
         }
 
-        test "IncrementSequence" {
+        test "IncrementSequence when SequenceNumber <> UInt64.Max" {
             let milliseconds = 100000UL
             let currentEntry = {
                 MillisecondsTime = milliseconds

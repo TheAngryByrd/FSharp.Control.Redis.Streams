@@ -11,6 +11,7 @@
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="../../src/FSharp.Control.Redis.Streams.Hopac/FSharp.Control.Redis.Streams.Hopac.fsproj" />
+        <ProjectReference Include="../FSharp.Control.Redis.Streams.Infrastructure.Tests/FSharp.Control.Redis.Streams.Infrastructure.Tests.fsproj" />
     </ItemGroup>
     <!-- <Import Project="..\..\fsc.props" /> -->
     <Import Project="..\..\netfx.props" />
