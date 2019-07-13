@@ -11,7 +11,7 @@ module Reactive =
     open FSharp.Control.Tasks.V2.ContextInsensitive
 
     module Observable =
-        let taskUnfold (fn: 's -> CancellationToken -> Task<('s * 'e) option>) (state: 's) =
+        let internal taskUnfold (fn: 's -> CancellationToken -> Task<('s * 'e) option>) (state: 's) =
             Observable.Create(fun (obs : IObserver<_>) ->
                 let cts = new CancellationTokenSource()
                 let ct = cts.Token
@@ -37,8 +37,9 @@ module Reactive =
 
                 new Disposables.CancellationDisposable(cts) :> IDisposable
             )
-        let flattenArray (observable : IObservable<array<_>>) =
-            observable.SelectMany (fun x -> x :> seq<_>)
+
+        let internal collect (fn: 't -> #seq<'u>) (source:IObservable<'t>) : IObservable<'u> =
+            source.SelectMany(fun x ->  fn x :> seq<_> )
 
     let pollStreamForever (redisdb : IDatabase) (streamName : RedisKey) (startingPosition : RedisValue) (pollOptions : PollOptions) =
         Observable.taskUnfold (fun (nextPosition, pollDelay) ct -> task {
@@ -55,7 +56,7 @@ module Reactive =
                 return Some ((nextPosition, nextPollDelay), entries )
 
         }) (startingPosition, TimeSpan.Zero)
-        |> Observable.flattenArray
+        |> Observable.collect id
 
     let readFromStream (redisdb : IDatabase) (streamRead : ReadStreamConfig) =
         let readForward (newMinId : RedisValue) =
@@ -109,6 +110,6 @@ module Reactive =
                 let nextPosition = calculateNextPosition lastEntry.Id
                 return Some (nextPosition, entries)
         }) startingPosition
-        |> Observable.flattenArray
+        |> Observable.collect id
 
 
