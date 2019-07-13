@@ -38,3 +38,58 @@ module Akka =
         }) (startingPosition, TimeSpan.Zero)
         |> Streams.collect id
 
+
+
+    let readFromStream (redisdb : IDatabase) (streamRead : ReadStreamConfig) =
+        let readForward (newMinId : RedisValue) =
+            redisdb.StreamRangeAsync(
+                key = streamRead.StreamName,
+                minId = Nullable newMinId,
+                maxId = Option.toNullable(streamRead.MaxId),
+                count = Option.toNullable streamRead.CountToPullATime,
+                messageOrder = streamRead.MessageOrder,
+                flags = streamRead.Flags
+            )
+
+        let readBackward (newMaxId : RedisValue) =
+            redisdb.StreamRangeAsync(
+                key = streamRead.StreamName,
+                minId = Option.toNullable(streamRead.MinId),
+                maxId = Nullable newMaxId,
+                count = Option.toNullable streamRead.CountToPullATime,
+                messageOrder = streamRead.MessageOrder,
+                flags = streamRead.Flags
+            )
+
+        let failureForMessageOrderCheck () =
+            failwith "If there's more than two directions in a stream the universe is broken, consult a physicist."
+
+        let startingPosition =
+            match streamRead.MessageOrder with
+            | Order.Ascending -> streamRead.MinId |> Option.defaultValue StreamConstants.ReadMinValue
+            | Order.Descending -> streamRead.MaxId |> Option.defaultValue StreamConstants.ReadMaxValue
+            | _ -> failureForMessageOrderCheck ()
+
+        let readStream =
+            match streamRead.MessageOrder with
+            | Order.Ascending -> readForward
+            | Order.Descending -> readBackward
+            | _ -> failureForMessageOrderCheck ()
+
+        let calculateNextPosition =
+            match streamRead.MessageOrder with
+            | Order.Ascending -> EntryId.CalculateNextPositionIncr
+            | Order.Descending -> EntryId.CalculateNextPositionDesc
+            | _ -> failureForMessageOrderCheck ()
+
+        Streams.taskUnfold(fun nextPosition -> task {
+            let! (response : StreamEntry []) = readStream nextPosition
+            match response with
+            | EmptyArray ->
+                return None
+            | entries ->
+                let lastEntry = Seq.last entries
+                let nextPosition = calculateNextPosition lastEntry.Id
+                return Some (nextPosition, entries)
+        }) startingPosition
+        |> Streams.collect id

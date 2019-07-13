@@ -29,6 +29,7 @@ module Hopac =
 
 
     let readFromStream (redisdb : IDatabase) (streamRead : ReadStreamConfig) =
+
         let readForward (newMinId : RedisValue) =
             redisdb.StreamRangeAsync(
                 key = streamRead.StreamName,
@@ -52,7 +53,7 @@ module Hopac =
         let failureForMessageOrderCheck () =
             failwith "If there's more than two directions in a stream the universe is broken, consult a physicist."
 
-        let startingPositiong =
+        let startingPosition =
             match streamRead.MessageOrder with
             | Order.Ascending -> streamRead.MinId |> Option.defaultValue StreamConstants.ReadMinValue
             | Order.Descending -> streamRead.MaxId |> Option.defaultValue StreamConstants.ReadMaxValue
@@ -79,5 +80,5 @@ module Hopac =
                 let lastEntry = Seq.last entries
                 let nextPosition = calculateNextPosition lastEntry.Id
                 return Some (entries, nextPosition)
-        }) startingPositiong
+        }) startingPosition
         |> Stream.appendMap (Stream.ofSeq)
