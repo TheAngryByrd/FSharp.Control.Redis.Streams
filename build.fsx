@@ -147,8 +147,8 @@ let clean _ =
     |> Seq.iter Shell.rm
 
 let dotnetRestore _ =
-    Paket.restore(fun p ->
-        {p with ToolPath = paketToolPath})
+    // Paket.restore(fun p ->
+    //     {p with ToolPath = paketToolPath})
 
     [sln ; toolsDir]
     |> Seq.map(fun dir -> fun () ->
@@ -170,10 +170,10 @@ let dotnetBuild ctx =
     let args =
         [
             sprintf "/p:PackageVersion=%s" releaseNotes.NugetVersion
-            "--no-restore"
         ]
     DotNet.build(fun c ->
         { c with
+            NoRestore = true
             Configuration = configuration (ctx.Context.AllExecutingTargets)
             Common =
                 c.Common

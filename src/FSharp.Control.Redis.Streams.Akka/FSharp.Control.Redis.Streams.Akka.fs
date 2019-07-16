@@ -10,18 +10,17 @@ module Akka =
 
     module Streams =
         let internal taskUnfold (fn: 's -> Task<('s * 'e) option>) (state: 's) : Source<'e, unit> =
-            Source.UnfoldAsync(state, Func<_, _>(fun x ->
+            Source.UnfoldAsync(state, fun x ->
                 task {
                     let! r = fn x
                     match r with
                     | Some tuple -> return tuple
-                    | None -> return Unchecked.defaultof<'s * 'e> })).MapMaterializedValue(Func<_,_>(ignore))
+                    | None -> return Unchecked.defaultof<'s * 'e> }).MapMaterializedValue(Func<_,_>(ignore))
 
         let internal collect (fn: 't -> #seq<'u>) (source) : Source<'u, 'mat> =
-            SourceOperations.SelectMany(source, Func<_, _>(fun x -> upcast fn x))
+            SourceOperations.SelectMany(source, fun x -> upcast fn x)
 
     let pollStreamForever (redisdb : IDatabase) (streamName : RedisKey) (startingPosition : RedisValue) (pollOptions : PollOptions) =
-
         Streams.taskUnfold (fun (nextPosition, pollDelay) -> task {
             let! (response : StreamEntry []) = redisdb.StreamRangeAsync(streamName, minId = Nullable(nextPosition), count = (Option.toNullable pollOptions.CountToPullATime))
             match response with
@@ -37,8 +36,6 @@ module Akka =
 
         }) (startingPosition, TimeSpan.Zero)
         |> Streams.collect id
-
-
 
     let readFromStream (redisdb : IDatabase) (streamRead : ReadStreamConfig) =
         let readForward (newMinId : RedisValue) =
@@ -64,23 +61,19 @@ module Akka =
         let failureForMessageOrderCheck () =
             failwith "If there's more than two directions in a stream the universe is broken, consult a physicist."
 
-        let startingPosition =
-            match streamRead.MessageOrder with
-            | Order.Ascending -> streamRead.MinId |> Option.defaultValue StreamConstants.ReadMinValue
-            | Order.Descending -> streamRead.MaxId |> Option.defaultValue StreamConstants.ReadMaxValue
-            | _ -> failureForMessageOrderCheck ()
-
-        let readStream =
-            match streamRead.MessageOrder with
-            | Order.Ascending -> readForward
-            | Order.Descending -> readBackward
-            | _ -> failureForMessageOrderCheck ()
-
-        let calculateNextPosition =
-            match streamRead.MessageOrder with
-            | Order.Ascending -> EntryId.CalculateNextPositionIncr
-            | Order.Descending -> EntryId.CalculateNextPositionDesc
-            | _ -> failureForMessageOrderCheck ()
+        let startingPosition,
+            readStream,
+            calculateNextPosition =
+                match streamRead.MessageOrder with
+                | Order.Ascending ->
+                    streamRead.MinId |> Option.defaultValue StreamConstants.ReadMinValue,
+                    readForward,
+                    EntryId.CalculateNextPositionIncr
+                | Order.Descending ->
+                    streamRead.MaxId |> Option.defaultValue StreamConstants.ReadMaxValue,
+                    readBackward,
+                    EntryId.CalculateNextPositionDesc
+                | _ -> failureForMessageOrderCheck ()
 
         Streams.taskUnfold(fun nextPosition -> task {
             let! (response : StreamEntry []) = readStream nextPosition

@@ -27,7 +27,6 @@ module Hopac =
         }) (startingPosition, TimeSpan.Zero)
         |> Stream.appendMap (Stream.ofSeq)
 
-
     let readFromStream (redisdb : IDatabase) (streamRead : ReadStreamConfig) =
 
         let readForward (newMinId : RedisValue) =
@@ -53,23 +52,19 @@ module Hopac =
         let failureForMessageOrderCheck () =
             failwith "If there's more than two directions in a stream the universe is broken, consult a physicist."
 
-        let startingPosition =
-            match streamRead.MessageOrder with
-            | Order.Ascending -> streamRead.MinId |> Option.defaultValue StreamConstants.ReadMinValue
-            | Order.Descending -> streamRead.MaxId |> Option.defaultValue StreamConstants.ReadMaxValue
-            | _ -> failureForMessageOrderCheck ()
-
-        let readStream =
-            match streamRead.MessageOrder with
-            | Order.Ascending -> readForward
-            | Order.Descending -> readBackward
-            | _ -> failureForMessageOrderCheck ()
-
-        let calculateNextPosition =
-            match streamRead.MessageOrder with
-            | Order.Ascending -> EntryId.CalculateNextPositionIncr
-            | Order.Descending -> EntryId.CalculateNextPositionDesc
-            | _ -> failureForMessageOrderCheck ()
+        let startingPosition,
+            readStream,
+            calculateNextPosition =
+                match streamRead.MessageOrder with
+                | Order.Ascending ->
+                    streamRead.MinId |> Option.defaultValue StreamConstants.ReadMinValue,
+                    readForward,
+                    EntryId.CalculateNextPositionIncr
+                | Order.Descending ->
+                    streamRead.MaxId |> Option.defaultValue StreamConstants.ReadMaxValue,
+                    readBackward,
+                    EntryId.CalculateNextPositionDesc
+                | _ -> failureForMessageOrderCheck ()
 
         Stream.unfoldJob(fun nextPosition -> job {
             let! (response : StreamEntry []) = readStream nextPosition

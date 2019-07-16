@@ -25,7 +25,7 @@ module Reactive =
                                 match result with
                                 | Some (newState, output) ->
                                     innerState <- newState
-                                    output |> obs.OnNext
+                                    obs.OnNext output
                                 | None ->
                                     isFinished <- true
                             obs.OnCompleted()
@@ -82,23 +82,19 @@ module Reactive =
         let failureForMessageOrderCheck () =
             failwith "If there's more than two directions in a stream the universe is broken, consult a physicist."
 
-        let startingPosition =
-            match streamRead.MessageOrder with
-            | Order.Ascending -> streamRead.MinId |> Option.defaultValue StreamConstants.ReadMinValue
-            | Order.Descending -> streamRead.MaxId |> Option.defaultValue StreamConstants.ReadMaxValue
-            | _ -> failureForMessageOrderCheck ()
-
-        let readStream =
-            match streamRead.MessageOrder with
-            | Order.Ascending -> readForward
-            | Order.Descending -> readBackward
-            | _ -> failureForMessageOrderCheck ()
-
-        let calculateNextPosition =
-            match streamRead.MessageOrder with
-            | Order.Ascending -> EntryId.CalculateNextPositionIncr
-            | Order.Descending -> EntryId.CalculateNextPositionDesc
-            | _ -> failureForMessageOrderCheck ()
+        let startingPosition,
+            readStream,
+            calculateNextPosition =
+                match streamRead.MessageOrder with
+                | Order.Ascending ->
+                    streamRead.MinId |> Option.defaultValue StreamConstants.ReadMinValue,
+                    readForward,
+                    EntryId.CalculateNextPositionIncr
+                | Order.Descending ->
+                    streamRead.MaxId |> Option.defaultValue StreamConstants.ReadMaxValue,
+                    readBackward,
+                    EntryId.CalculateNextPositionDesc
+                | _ -> failureForMessageOrderCheck ()
 
         Observable.taskUnfold(fun nextPosition ct -> task {
             let! (response : StreamEntry []) = readStream nextPosition
