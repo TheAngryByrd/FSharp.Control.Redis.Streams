@@ -6,6 +6,10 @@ module Hopac =
     open StackExchange.Redis
     open FSharp.Control.Redis.Streams.Core
 
+    module Stream =
+        let internal collect x =
+            x |> Stream.appendMap Stream.ofSeq
+
     let pollStreamForever (redisdb : IDatabase) (streamName : RedisKey) (startingPosition : RedisValue) (pollOptions : PollOptions) =
         Stream.unfoldJob(fun (nextPosition, pollDelay) -> job {
             let! (response : StreamEntry []) =
@@ -25,7 +29,7 @@ module Hopac =
                 let nextPollDelay = TimeSpan.Zero
                 return Some (entries, (nextPosition, nextPollDelay))
         }) (startingPosition, TimeSpan.Zero)
-        |> Stream.appendMap (Stream.ofSeq)
+        |> Stream.collect
 
     let readFromStream (redisdb : IDatabase) (streamRead : ReadStreamConfig) =
 
@@ -76,4 +80,4 @@ module Hopac =
                 let nextPosition = calculateNextPosition lastEntry.Id
                 return Some (entries, nextPosition)
         }) startingPosition
-        |> Stream.appendMap (Stream.ofSeq)
+        |> Stream.collect
