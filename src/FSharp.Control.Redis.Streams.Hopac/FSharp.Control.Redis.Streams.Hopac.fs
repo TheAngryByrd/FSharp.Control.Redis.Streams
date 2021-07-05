@@ -7,8 +7,8 @@ module Hopac =
     open FSharp.Control.Redis.Streams.Core
 
     module Stream =
-        let internal collect x =
-            x |> Stream.appendMap Stream.ofSeq
+        let internal collect (fn: 't -> #seq<'u>) x =
+            x |> Stream.mapFun fn |> Stream.appendMap Stream.ofSeq
 
     let pollStreamForever (redisdb : IDatabase) (streamName : RedisKey) (startingPosition : RedisValue) (pollOptions : PollOptions) =
         Stream.unfoldJob(fun (nextPosition, pollDelay) -> job {
@@ -29,7 +29,40 @@ module Hopac =
                 let nextPollDelay = TimeSpan.Zero
                 return Some (entries, (nextPosition, nextPollDelay))
         }) (startingPosition, TimeSpan.Zero)
-        |> Stream.collect
+        |> Stream.collect id
+
+    let pollStreamForeverSafe (redisdb : IDatabase) (streamName : RedisKey) (startingPosition : RedisValue) (pollOptions : PollOptions) =
+        Stream.unfoldJob(fun (nextPosition, pollDelay) -> job {
+            let! (response : Result<StreamEntry [], exn>) = job {
+                try
+                    let! response =
+                        redisdb.StreamRangeAsync(
+                            streamName,
+                            minId = Nullable(nextPosition),
+                            count = (Option.toNullable pollOptions.CountToPullATime))
+                    return Ok response
+                with e ->
+                    return Error e
+            }
+
+            match response with
+            | Error exn ->
+                let nextPollDelay = pollOptions.CalculateNextPollDelay pollDelay
+                do! timeOut pollDelay
+                return Some (Error exn, (nextPosition, nextPollDelay ))
+            | Ok EmptyArray ->
+                let nextPollDelay = pollOptions.CalculateNextPollDelay pollDelay
+                do! timeOut pollDelay
+                return Some (Ok Array.empty, (nextPosition, nextPollDelay ))
+            | Ok entries ->
+                let lastEntry = Seq.last entries
+                let nextPosition = EntryId.CalculateNextPositionIncr lastEntry.Id
+                let nextPollDelay = TimeSpan.Zero
+                return Some (Ok entries, (nextPosition, nextPollDelay))
+        }) (startingPosition, TimeSpan.Zero)
+        |> Stream.collect (function
+            | Ok entries -> entries |> Array.map Ok
+            | Error exn -> [|Error exn|])
 
     let readFromStream (redisdb : IDatabase) (streamRead : ReadStreamConfig) =
 
@@ -80,4 +113,4 @@ module Hopac =
                 let nextPosition = calculateNextPosition lastEntry.Id
                 return Some (entries, nextPosition)
         }) startingPosition
-        |> Stream.collect
+        |> Stream.collect id

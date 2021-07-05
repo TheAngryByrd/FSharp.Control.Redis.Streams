@@ -37,6 +37,35 @@ module Akka =
         }) (startingPosition, TimeSpan.Zero)
         |> Streams.collect id
 
+    let pollStreamForeverSafe (redisdb : IDatabase) (streamName : RedisKey) (startingPosition : RedisValue) (pollOptions : PollOptions) =
+        Streams.taskUnfold (fun (nextPosition, pollDelay) -> task {
+            let! (response : Result<StreamEntry [], exn>) = task {
+                try
+                    let! response = redisdb.StreamRangeAsync(streamName, minId = Nullable(nextPosition), count = (Option.toNullable pollOptions.CountToPullATime))
+                    return Ok response
+                with e ->
+                    return Error e
+            }
+            match response with
+            | Error exn ->
+                let nextPollDelay = pollOptions.CalculateNextPollDelay pollDelay
+                do! Task.Delay pollDelay
+                return Some ((nextPosition, nextPollDelay ) , Error exn )
+            | Ok EmptyArray ->
+                let nextPollDelay = pollOptions.CalculateNextPollDelay pollDelay
+                do! Task.Delay pollDelay
+                return Some ((nextPosition, nextPollDelay ) , Ok Array.empty )
+            | Ok entries ->
+                let lastEntry = Seq.last entries
+                let nextPosition = EntryId.CalculateNextPositionIncr lastEntry.Id
+                let nextPollDelay = TimeSpan.Zero
+                return Some ((nextPosition, nextPollDelay), Ok entries )
+
+        }) (startingPosition, TimeSpan.Zero)
+        |> Streams.collect (function
+            | Ok entries -> entries |> Array.map Ok
+            | Error exn -> [|Error exn|])
+
     let readFromStream (redisdb : IDatabase) (streamRead : ReadStreamConfig) =
         let readForward (newMinId : RedisValue) =
             redisdb.StreamRangeAsync(
